@@ -1,0 +1,3 @@
+[submodule "BackEnd/Ecommerce"]
+	path = BackEnd/Ecommerce
+	url = https://github.com/MurariSingh045/Shopify-E-commerce.git
