@@ -1,47 +1,56 @@
 package com.ms.Ecomm.controller;
 
-import com.ms.Ecomm.model.User;
+
+import com.ms.Ecomm.dto.JwtResponse;
+import com.ms.Ecomm.dto.UserResponseDTO;
+import com.ms.Ecomm.dto.UserSignInDTO;
+import com.ms.Ecomm.dto.UserSignUpDTO;
 import com.ms.Ecomm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-//@RequestMapping("/users") on the class makes all methods inside this class start with /users.
-// it will act as base url
-//GET /users → calls getAllUsers()
 @RequestMapping("/users")
-// * : it will apply for all.
-@CrossOrigin("*") // means resource sharing between two different domain
+@CrossOrigin("*")
 public class UserController {
 
-    // need service here
-    @Autowired // automatically inject dependency here.
+    @Autowired
     private UserService userService;
 
-    // if user wants to register himself.
+
+
+    // register/signup user
     @PostMapping("/register")
-    public User resgisterUser(@RequestBody User user){
-
-        // here userService will call registerUser method() & will add user details.
-        return userService.registerUser(user);
+    public ResponseEntity<?> registerUser(@RequestBody UserSignUpDTO userSignUpDTO)
+    {
+        try{
+            UserResponseDTO response =  userService.registerUser(userSignUpDTO);
+            return ResponseEntity.ok(response);
+        }catch (Exception e) {
+            e.printStackTrace(); //  log exception
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
     }
 
-    // feature of login for Users we are providing here.
+
+    // login user
     @PostMapping("/login")
-    public User loginUser(@RequestBody User user){
-
-        return userService.loginUser(user.getEmail() , user.getPassword());
+    public ResponseEntity<?> loginUser(@RequestBody UserSignInDTO userSignInDTO) {
+        try {
+                JwtResponse response = userService.loginUser(userSignInDTO.getEmail(), userSignInDTO.getPassword());
+                return ResponseEntity.ok(response);
+        }catch (Exception e) {
+            e.printStackTrace(); //  log exception
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
     }
-
-
-    // APi to get all User Details
-    @GetMapping()
-    public List<User> getAllUsers()
-    {    // calling getAllUsers() method of service layer
-        return userService.getAllUsers();
-    }
-
 
 }
+
+
+// pass
+// ram -> ram@321
+//vinay -> @vinay321
+//abhi -> @abhi321

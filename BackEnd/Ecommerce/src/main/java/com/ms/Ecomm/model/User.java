@@ -2,10 +2,16 @@ package com.ms.Ecomm.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
@@ -66,4 +72,6 @@ public class User {
     public void setOrders(List<Orders> orders) {
         this.orders = orders;
     }
+
+
 }

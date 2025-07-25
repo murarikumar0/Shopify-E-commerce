@@ -17,6 +17,7 @@ public class Orders {
     // to avoid recursive problem
     // @JsonBackReference this tells Spring that user will handle reference of this
     @JsonBackReference
+
     private User user;
 
     private double totalAmount;

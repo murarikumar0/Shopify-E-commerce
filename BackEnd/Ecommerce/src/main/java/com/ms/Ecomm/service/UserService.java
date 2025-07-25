@@ -1,52 +1,79 @@
 package com.ms.Ecomm.service;
 
+import com.ms.Ecomm.dto.JwtResponse;
+import com.ms.Ecomm.dto.UserResponseDTO;
+import com.ms.Ecomm.dto.UserSignUpDTO;
 import com.ms.Ecomm.model.User;
 import com.ms.Ecomm.repo.UserRepository;
+import com.ms.Ecomm.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
 
-    // want user repo here
     @Autowired
     private UserRepository userRepository;
-    public User registerUser(User user) {
-        try {
 
-            // here by userRepo, one method will call name save()(builtIn - method()) of JPA
-            // and it will take user details and Save into DataBase. &  holding it into newUser.
-            User newUser = userRepository.save(user);
-            System.out.println("User Added to DataBase");
-            return newUser; // return newUser
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    public UserResponseDTO registerUser(UserSignUpDTO userSignUpDTO) {
+        try
+        {
+            // check for the duplicate users: if the user email already exists, return bad request
+           // Prevents multiple accounts with the same email. & email would be unique
+            // Check if user already exists
+            Optional<User> existingUser = Optional.ofNullable(userRepository.findByEmail(userSignUpDTO.getEmail()));
+            if (existingUser.isPresent()) {
+                throw new RuntimeException("User already exists with this email.");
+
+            }
+
+            User newUser = new User();
+            newUser.setName(userSignUpDTO.getName());
+            newUser.setEmail(userSignUpDTO.getEmail());
+           // first encrypting the pass and then saving to DB
+            newUser.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
+
+
+          User saved =  userRepository.save(newUser); // saving new user to DB
+
+            return UserResponseDTO.builder()
+                    .id(saved.getId())
+                    .name(saved.getName())
+                    .email(saved.getEmail())
+                    .build();
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public User loginUser(String email , String password) {
-
-        // if user enters email & password
-        // 1 st step will do that check in the DB if the user is present or not
-        User user = userRepository.findByemail(email);
-
-        // if we found user in DB & then will check if the password of  user
-        // are equal to the DB user password then we will return user
-        if(user != null && user.getPassword().equals(password)){
-            return user; // returning user
+            throw new RuntimeException("Registration failed: " + e.getMessage());
         }
 
-        // if the user not found in DB then return null
-        return null; // invalid credential.
+
     }
 
-    public List<User> getAllUsers() {
 
-        // here userRepo is calling findAll() method of JPA
-        // to show all details of users & also we are returning it.
-        return userRepository.findAll();
+    public JwtResponse loginUser(String email, String password) {
+
+        // check the user is valid  or not here
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password));
+
+        // token generation
+        String token = jwtUtil.generateToken(email);
+
+        // return JwtResponse
+        JwtResponse response = new JwtResponse(token);
+        return response;
     }
 }
