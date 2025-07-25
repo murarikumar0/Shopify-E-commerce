@@ -16,7 +16,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-public class JwtFilter extends OncePerRequestFilter {
+public class JwtFilter  extends OncePerRequestFilter {
+
 
 
     @Autowired
@@ -32,7 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-       //This reads the Authorization header from the incoming HTTP request.
+        //This reads the Authorization header from the incoming HTTP request.
         // Step 1: Get the Authorization Header
         final String authHeader = request.getHeader("Authorization");
         String email = null;
@@ -68,7 +69,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-       //After your custom logic, control passes to the next filter in the chain (could be Spring MVC, another filter, etc.).
+        //After your custom logic, control passes to the next filter in the chain (could be Spring MVC, another filter, etc.).
         filterChain.doFilter(request, response);
     }
 }
